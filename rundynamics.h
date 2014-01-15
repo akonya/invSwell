@@ -80,6 +80,7 @@ void run_dynamics(DevDataBlock *data
 											  , data->dev_TetVol
 											  , data->dev_TetToNode
 											  , data->dev_TetToNodepitch
+                        , data->dev_swell
 											  , dt*float(iKern));
 
 	//sync threads before updating

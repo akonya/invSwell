@@ -11,18 +11,23 @@
 //convert mesh length scale to cm
 #define meshScale        0.1         //--[ cm / mesh unit]                      
 
+//confineing prameters
+#define CONFTOP 0.7        //confined top
+#define CONFBOTTOM 0.2     //confined bottom
+#define CONFFORCE  100000.0     //confining force if above CONFTOP or below CONFBOTTOM
+
+
+// define lamda and mu
+#define LAMBDA 56000000.0  
+#define MU   2280000.0
 
 //Elasticity constants (Lame' Coefficients)
 //  -there is a factor of two off here from 
 //  -the physical values, not sure if it
 //  -is a half or two... I will find out
-#define cxxxx			 29100000.0	  //--[ g / cm * s^2 ]			
+#define cxxxx			 29140000.0	  //--[ g / cm * s^2 ]			
 #define cxxyy			 28000000.0	  //--[ g / cm * s^2 ]			
 #define cxyxy			 570000.0	  //--[ g / cm * s^2 ]	
-
-
-//Q:elasticity coupling constant
-#define alpha            570000.0*1.5 //--[ g / cm * s^2 ]
 
 
 //Density of elastomer material
@@ -31,7 +36,7 @@
 
 //scalar velocity dampening
 //each velocity multiplied by this at each step
-#define damp             0.999997      //--[ unitless ]
+#define damp             0.999      //--[ unitless ]
 
 
 //x and y dimensions of n profile

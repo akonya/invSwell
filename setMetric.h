@@ -19,7 +19,7 @@ __device__ float getMetric(float rx,float ry,float rz){
   dy = cy-ry;
   dr2 = dx*dx+dy*dy;
   temp = 1.0+dr2/bigR2; 
-  metric = cSwell/temp;
+  metric = 1.0;//cSwell/temp;
 
 return metric;
 }//getMetric
@@ -29,9 +29,9 @@ return metric;
 //===================================//
 // swell "equilibrium" state         //
 //===================================//
-__device__ void swell(float *r0,float t){
+__device__ void sweller(float *r0,float *swell,int tetID){
   float xmid=0.0,ymid=0.0,zmid=0.0;
-  float metricQR; //cube root of metric
+  float metric; //cube root of metric
   float rSwell[12];  
   float swellTime = 0.030;
   float slowSwell;
@@ -54,22 +54,26 @@ __device__ void swell(float *r0,float t){
   }//n
 
   //get swelling factor
-  metricQR = getMetric(xmid,ymid,zmid);
-  //metricQR = 1.3;
+  metric = swell[tetID];
   
-  //slowly swell 
-  slowSwell = 1.0;
-  if(t<swellTime){slowSwell = t/swellTime;}
-  metricQR = 1.0+(metricQR-1.0)*slowSwell;
 
   //swell 
   for(int n=0;n<4;n++){
-    r0[3*n] = r0[0]+metricQR*rSwell[3*n];
-    r0[3*n+1] = r0[1]+metricQR*rSwell[3*n+1];
-    r0[3*n+2] = r0[2]+metricQR*rSwell[3*n+2];
+    r0[3*n] = r0[0]+metric*rSwell[3*n];
+    r0[3*n+1] = r0[1]+metric*rSwell[3*n+1];
+    r0[3*n+2] = r0[2]+metric*rSwell[3*n+2];
   }//n
 
 }//swell
+
+//===================================//
+//update swelling                    //
+//===================================//
+__device__ void updateSwell(float *swell, float *stress, int tetID){
+  float stress_trace = stress[3*0+0]+stress[3*1+1]+stress[3*2+2];
+  swell[tetID] += 0.000000001*stress_trace;
+}//updateSwell
+
 
 
 //===================================//
@@ -89,7 +93,7 @@ float getMetricLocal(float rx,float ry,float rz){
   dy = cy-ry;
   dr2 = dx*dx+dy*dy;
   temp = 1.0+dr2/bigR2;  
-  metric = cSwell/temp;
+  metric = 1.0;//cSwell/temp;
 
 return metric;
 }//getMetric

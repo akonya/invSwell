@@ -11,7 +11,7 @@
 //=============================================================
 //calculate forces on all 4 nodes in tetrahedra
 //=============================================================
-__device__ void force_calc(float *r0,float *r,float (&F)[12],int *TetNodeRank,float *pe,int mytet,float myVol,float t){
+__device__ void force_calc(float *r0,float *r,float (&F)[12],int *TetNodeRank,float *pe,int mytet,float myVol,float t,float *swell,int tetID){
 
 	float u[4],v[4],w[4];
 	float eps[9];
@@ -21,9 +21,11 @@ __device__ void force_calc(float *r0,float *r,float (&F)[12],int *TetNodeRank,fl
 	float localPe = 0.0;
 	float A[16] = {0.0};
   float Ainv[16] = {0.0};
+  float stress[9];
+  float eps_trace;
 
   //do swelling
-  swell(r0,t);
+  sweller(r0,swell,tetID);
 
 	//clacluate displacements from original position and zero out forces
 	for(int n=0;n<4;n++){
@@ -63,7 +65,24 @@ __device__ void force_calc(float *r0,float *r,float (&F)[12],int *TetNodeRank,fl
 	eps[3*1+2] = 0.5*(b[3]+c[2]+a[2]*a[3]+b[2]*b[3]+c[2]*c[3]);
 	eps[3*2+1] = eps[3*1+2];
 
-	//calculate potential energy
+  //calculate trace of epsilon
+  eps_trace  = eps[3*0+0]+eps[3*1+1]+eps[3*2+2];
+
+  //calculate stress tensor
+  stress[3*0+0] = LAMBDA*eps_trace+2.0*MU*eps[3*0+0];
+  stress[3*0+1] = 2.0*MU*eps[3*0+1];
+  stress[3*0+2] = 2.0*MU*eps[3*0+2];
+  stress[3*1+0] = stress[3*0+1];
+  stress[3*1+1] = LAMBDA*eps_trace+2.0*MU*eps[3*1+1];
+  stress[3*1+2] = 2.0*MU*eps[3*1+2];
+  stress[3*2+0] = stress[3*0+2]; 
+  stress[3*2+1] = stress[3*1+2];
+  stress[3*2+2] = LAMBDA*eps_trace+2.0*MU*eps[3*2+2];
+	
+  //update swelling 
+   updateSwell(swell,stress,tetID);
+
+  //calculate potential energy
 	localPe += cxxxx*(eps[3*0+0]*eps[3*0+0]+eps[3*1+1]*eps[3*1+1]+eps[3*2+2]*eps[3*2+2]);
 	localPe += 2.0*cxxyy*(eps[3*0+0]*eps[3*1+1]+eps[3*1+1]*eps[3*2+2]+eps[3*0+0]*eps[3*2+2]);
 	localPe += 4.0*cxyxy*(eps[3*0+1]*eps[3*0+1]+eps[3*1+2]*eps[3*1+2]+eps[3*2+0]*eps[3*2+0]);
@@ -131,57 +150,26 @@ __device__ void force_calc(float *r0,float *r,float (&F)[12],int *TetNodeRank,fl
 		}//n
 
 
-	//add user calculated force (UserDefined.h)
-//	userForce(r,Q,F);
 
 
 }//force_calc
 
 
-//===========================================================
-//calculate drag forces, equal and oposite between neighbors
-//----NOT WORKING
-//===========================================================
-/*
-__device__ void calc_drag(float *v,float *r,float (&F)[12]){
-	float dx,dy,dz,RR,R,dvx,dvy,dvz,ff,ffx,ffy,ffz;
-
-	
-
-	for(int i=0;i<3;i++){
-		for(int j=i+1;j<4;j++){
-
-			dx = r[3*j]-r[3*i];
-			dy = r[1+3*j]-r[1+3*i];
-			dz = r[2+3*j]-r[2+3*i];
-
-			RR = dx*dx+dy*dy+dz*dz;
-			R = sqrt(RR);
-
-			dvx = v[3*j]-v[3*i];
-			dvy = v[1+3*j]-v[1+3*i];
-			dvz = v[2+3*j]-v[2+3*i];
-
-			ff = -gamma*(dvx*dx+dvy*dy+dvz*dz)/(RR*R);
-
-			ffx = ff*dx;
-			ffy = ff*dy;
-			ffz = ff*dz;
-
-			//update F
-			F[3*i]+=-ffx;
-			F[3*j]+=ffx;
-			F[1+3*i]+=-ffy;
-			F[1+3*j]+=ffy;
-			F[2+3*i]+=-ffz;
-			F[2+3*j]+=ffz;
-
-
-		}//j
-	}//i
-
-}//calc_drag
-*/
+//=============================================================
+//calculate confining forces
+//=============================================================
+__device__ void confineForce(float *r,float (&F)[12]){
+  int nLoc;
+  for (int n=0;n<4;n++){
+    nLoc = 2+n*3;
+    if(r[nLoc]>CONFTOP){
+      F[nLoc]+=-CONFFORCE; 
+    }
+    if(r[nLoc]<CONFBOTTOM){
+      F[nLoc]+=CONFFORCE; 
+    }//if
+  }//for n
+}
 
 
 #endif//__FORCECALC_H__

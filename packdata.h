@@ -17,6 +17,7 @@ void packdata(NodeArray &i_Node,TetArray &i_Tet, HostDataBlock *dat,int Ntets,in
 	dat->host_nodeRank = (int*)malloc(Nnodes*sizeof(int));
 	dat->host_m = (float*)malloc(Nnodes*sizeof(float));
 	dat->host_pe = (float*)malloc(Ntets*sizeof(float));
+	dat->host_swell = (float*)malloc(Ntets*sizeof(float));
 	dat->host_TetNodeRank = (int*)malloc(Ntets*4*sizeof(int));
 	dat->host_dr = (float*)malloc(Nnodes*MaxNodeRank*sizeof(float));
 	dat->host_totalVolume = i_Tet.get_total_volume();
@@ -25,6 +26,7 @@ void packdata(NodeArray &i_Node,TetArray &i_Tet, HostDataBlock *dat,int Ntets,in
 
 	for (int tet = 0;tet<Ntets;tet++){
 		dat->host_TetVol[tet] = i_Tet.get_volume(tet);
+    dat->host_swell[tet] = 1.0;
 		for (int sweep = 0;sweep<4;sweep++){
 
 				dat->host_TetToNode[tet+sweep*Ntets] = i_Tet.get_nab(tet,sweep);

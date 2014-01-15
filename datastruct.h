@@ -9,6 +9,7 @@ struct DevDataBlock {
 	float *dev_F;
 	float *dev_dF;
 	float *dev_v;
+  float *dev_swell;
 	int *dev_nodeRank;
 	int *dev_TetNodeRank;
 	float *dev_dr;
@@ -45,6 +46,7 @@ struct HostDataBlock {
 	float host_totalVolume;
 	float *host_TetVol;
 	int *host_ThPhi;
+  float *host_swell;
 
 };
 

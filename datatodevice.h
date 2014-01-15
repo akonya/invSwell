@@ -66,6 +66,9 @@ void data_to_device(DevDataBlock *dev_dat, HostDataBlock *host_dat,int Ntets,int
 
 	HANDLE_ERROR( cudaMalloc( (void**) &dev_dat->dev_pe
 									,Ntets*sizeof(float) ) );
+
+	HANDLE_ERROR( cudaMalloc( (void**) &dev_dat->dev_swell
+									,Ntets*sizeof(float) ) );
 	
 	HANDLE_ERROR( cudaMalloc( (void**) &dev_dat->dev_TetVol
 									,Ntets*sizeof(float) ) );
@@ -91,6 +94,12 @@ void data_to_device(DevDataBlock *dev_dat, HostDataBlock *host_dat,int Ntets,int
 								,Nnodes*sizeof(float)
 								,cudaMemcpyHostToDevice) );
 	
+	HANDLE_ERROR( cudaMemcpy(dev_dat->dev_swell
+								,host_dat->host_swell
+								,Ntets*sizeof(float)
+								,cudaMemcpyHostToDevice) );
+
+
 	HANDLE_ERROR( cudaMemcpy(dev_dat->dev_TetVol
 								,host_dat->host_TetVol
 								,Ntets*sizeof(float)

@@ -16,6 +16,7 @@ __global__ void force_kernel(float *dF
 								,float *TetVol
 								,int *TetToNode
 								,int pitchTetToNode
+                ,float *swell
 								,float t){
 
 
@@ -66,20 +67,18 @@ __global__ void force_kernel(float *dF
 		//========================================
 		get_variable_data(r,node_num);
     myVol = tetVol(r);
-
-
-		//========================================
-		//Calcuate Q as a function of Position
-		//and time for this tetrahedra
-		//========================================
-		//getQ(ThPhi[tid],Q,t);
-
 		
 		//========================================
 		//calculate the force on each node due
 		//to interactions in this tetrahedra
 		//========================================
-		force_calc(r0,r,F,TetNodeRank,pe,tid,myVol,t);
+		force_calc(r0,r,F,TetNodeRank,pe,tid,myVol,t,swell,tid);
+
+
+    //========================================
+    //add confining force
+    //========================================
+    confineForce(r,F);
 
 
 		//========================================
