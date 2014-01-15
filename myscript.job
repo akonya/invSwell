@@ -1,0 +1,8 @@
+#PBS -l walltime=:14:30:00
+#PBS -l nodes=1:ppn=1:gpus=1
+#PBS -N GAFEtest
+#PBS -j oe
+module load cuda
+cd GAFESv2
+nvcc -o runGAFE main.cu genrand.cpp
+./runGAFE
