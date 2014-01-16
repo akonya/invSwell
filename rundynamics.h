@@ -121,6 +121,12 @@ void run_dynamics(DevDataBlock *data
 								,NSTEPS);
 
 	   //print frame
+    printMetric(   data
+						,host_data
+						,Ntets
+						,Nnodes
+						,iKern+1);
+
 		printVTKframe(   data
 						,host_data
 						,Ntets

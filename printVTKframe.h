@@ -2,7 +2,6 @@
 #define __PRINTVTKFRAME_H__
 
 #include "mainhead.h"
-
 //=============================================================
 //print new vtk file for a time step
 void printVTKframe(   DevDataBlock *dev_dat
@@ -35,6 +34,11 @@ void printVTKframe(   DevDataBlock *dev_dat
 
 	HANDLE_ERROR( cudaMemcpy(  host_dat->host_pe
 								, dev_dat->dev_pe
+								, Ntets*sizeof(float)
+								, cudaMemcpyDeviceToHost ) );
+	
+	HANDLE_ERROR( cudaMemcpy(  host_dat->host_swell
+								, dev_dat->dev_swell
 								, Ntets*sizeof(float)
 								, cudaMemcpyDeviceToHost ) );
 								
@@ -95,6 +99,20 @@ void printVTKframe(   DevDataBlock *dev_dat
 
 	fprintf(out,"\n");
 
+	fprintf(out,"CELL_DATA %d\n",Ntets);
+	fprintf(out,"SCALARS metric FLOAT 1\n");
+	fprintf(out,"LOOKUP_TABLE default\n");
+	for(int nt=0;nt<Ntets;nt++){
+		fprintf(out,"%f\n",host_dat->host_swell[nt]);
+	}//nt
+
+	//peTOTAL = peTOTAL*10000000.0;
+
+
+
+	fprintf(out,"\n");
+
+
 	fclose(out);		//close output file
 
 	float tetke,keTOTAL = 0.0,vx,vy,vz;
@@ -115,6 +133,60 @@ void printVTKframe(   DevDataBlock *dev_dat
 
 
 }//printVTKframe
+
+
+
+
+//=============================================================
+//print metric data
+void printMetric(   DevDataBlock *dev_dat
+					, HostDataBlock *host_dat
+					,int Ntets
+					,int Nnodes
+					,int step){
+
+	//need to pitch 1D memory correctly to send to device
+	size_t height3 = 3;
+	size_t widthNODE = Nnodes;
+
+
+	HANDLE_ERROR( cudaMemcpy2D(  host_dat->host_r
+								, widthNODE*sizeof(float)
+								, dev_dat->dev_r
+								, dev_dat->dev_rpitch
+								, widthNODE*sizeof(float)
+								, height3
+								, cudaMemcpyDeviceToHost ) );
+
+	HANDLE_ERROR( cudaMemcpy(  host_dat->host_swell
+								, dev_dat->dev_swell
+								, Ntets*sizeof(float)
+								, cudaMemcpyDeviceToHost ) );
+								
+
+	char fout[60];
+	sprintf(fout,"SWELL//swell%d.vtk",step);
+	FILE*out;
+	out = fopen(fout,"w");
+  int n1,n2,n3,n4;
+  float rx,ry,rz,met;
+  for(int nt=0;nt<Ntets;nt++){
+    n1 = host_dat->host_TetToNode[nt+Ntets*0];
+    n2 = host_dat->host_TetToNode[nt+Ntets*1];
+    n3 = host_dat->host_TetToNode[nt+Ntets*2];
+    n4 = host_dat->host_TetToNode[nt+Ntets*3];
+
+    rx = (host_dat->host_r[n1+0*Nnodes]+host_dat->host_r[n2+0*Nnodes]+host_dat->host_r[n3+0*Nnodes]+host_dat->host_r[n4+0*Nnodes])/4.0;
+    ry = (host_dat->host_r[n1+1*Nnodes]+host_dat->host_r[n2+1*Nnodes]+host_dat->host_r[n3+1*Nnodes]+host_dat->host_r[n4+1*Nnodes])/4.0;
+    rz = (host_dat->host_r[n1+2*Nnodes]+host_dat->host_r[n2+2*Nnodes]+host_dat->host_r[n3+2*Nnodes]+host_dat->host_r[n4+2*Nnodes])/4.0;
+
+    met = host_dat->host_swell[nt];
+  
+    fprintf(out,"%f %f %f %f\n", rx,ry,rz,met);  
+  }//nt
+
+	fclose(out);		//close output file
+}//printMetric
 
 
 
