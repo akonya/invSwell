@@ -80,7 +80,7 @@ __device__ void force_calc(float *r0,float *r,float (&F)[12],int *TetNodeRank,fl
   stress[3*2+2] = LAMBDA*eps_trace+2.0*MU*eps[3*2+2];
 	
   //update swelling 
-   updateSwell(swell,stress,tetID);
+  if(t>0.1){ updateSwell(swell,stress,tetID);}
 
   //calculate potential energy
 	localPe += cxxxx*(eps[3*0+0]*eps[3*0+0]+eps[3*1+1]*eps[3*1+1]+eps[3*2+2]*eps[3*2+2]);

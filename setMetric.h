@@ -71,7 +71,12 @@ __device__ void sweller(float *r0,float *swell,int tetID){
 //===================================//
 __device__ void updateSwell(float *swell, float *stress, int tetID){
   float stress_trace = stress[3*0+0]+stress[3*1+1]+stress[3*2+2];
-  swell[tetID] += 0.000000001*stress_trace;
+  float dswell = -0.01;
+  if (stress_trace>0.0){
+    dswell = -dswell;
+  }
+  //swell[tetID] += dswell;
+  swell[tetID] += 0.000000003*stress_trace;
 }//updateSwell
 
 
