@@ -99,7 +99,6 @@ void printVTKframe(   DevDataBlock *dev_dat
 
 	fprintf(out,"\n");
 
-	fprintf(out,"CELL_DATA %d\n",Ntets);
 	fprintf(out,"SCALARS metric FLOAT 1\n");
 	fprintf(out,"LOOKUP_TABLE default\n");
 	for(int nt=0;nt<Ntets;nt++){
@@ -165,7 +164,7 @@ void printMetric(   DevDataBlock *dev_dat
 								
 
 	char fout[60];
-	sprintf(fout,"SWELL//swell%d.vtk",step);
+	sprintf(fout,"SWELL//swell%d.dat",step);
 	FILE*out;
 	out = fopen(fout,"w");
   int n1,n2,n3,n4;

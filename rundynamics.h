@@ -145,10 +145,10 @@ void run_dynamics(DevDataBlock *data
 		fprintf(Eout,"%f %f %f %f\n",float(iKern)*dt,pE,kE,pE+kE);
 		fflush(Eout);
 
-    graph->update(data,host_data);
-    graph->calcGauss();
-    graph->printFrame(iKern+1);
-    graph->dumpState(iKern+1);
+    //graph->update(data,host_data);
+    //graph->calcGauss();
+    //graph->printFrame(iKern+1);
+    //graph->dumpState(iKern+1);
     
 	}//if((iKern+1)%iterPerFrame==0)
 

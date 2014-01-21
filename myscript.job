@@ -1,4 +1,4 @@
-#PBS -l walltime=:14:30:00
+#PBS -l walltime=:02:30:00
 #PBS -l nodes=1:ppn=1:gpus=1
 #PBS -N INVS
 #PBS -j oe
